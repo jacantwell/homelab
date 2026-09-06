@@ -1,0 +1,11 @@
+[Unit]
+Description=Run homelab-sync 2 min after boot, then every 5 min
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

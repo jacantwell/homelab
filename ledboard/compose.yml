@@ -1,0 +1,30 @@
+services:
+  ledboardd:
+    image: ghcr.io/jacantwell/ledboard:${LEDBOARD_TAG:-main}
+    container_name: ledboardd
+    pull_policy: always
+    restart: unless-stopped
+    init: true
+    user: "1000:1000"
+    # gid of the host `gpio` group, which owns /dev/pio0. 986 on jasperpi.
+    group_add:
+      - "${GPIO_GID:-986}"
+    # The only device piomatter opens. No privileged mode needed.
+    devices:
+      - /dev/pio0:/dev/pio0
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      LEDBOARD_DISPLAY: hw
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data/ledboardd:/data
+    # SIGTERM handler blanks the panel; give it a moment.
+    stop_grace_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

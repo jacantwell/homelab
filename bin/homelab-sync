@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Pull the repo and bring every stack up to date. Safe to run every few minutes.
+set -euo pipefail
+
+cd "$(dirname "$(readlink -f "$0")")/.."
+
+log() { printf '%s homelab-sync: %s\n' "$(date +'%Y-%m-%dT%H:%M:%S')" "$*"; }
+
+before=$(git rev-parse HEAD)
+if ! git pull --ff-only --quiet; then
+  log "git pull failed, deploying whatever is checked out"
+fi
+after=$(git rev-parse HEAD)
+[ "$before" != "$after" ] && log "repo moved $before -> $after"
+
+for compose in */compose.yml; do
+  stack=$(dirname "$compose")
+  if [ -f "$stack/.env.example" ] && [ ! -f "$stack/.env" ]; then
+    log "$stack: no .env yet, copying .env.example"
+    cp "$stack/.env.example" "$stack/.env"
+  fi
+  if docker compose -f "$compose" up -d --pull always --remove-orphans --quiet-pull 2>&1 \
+       | grep -vE '^\s*$' | sed "s/^/$stack: /"; then
+    :
+  fi
+done
+
+docker image prune -f >/dev/null 2>&1 || true
+log "done"

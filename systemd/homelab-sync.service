@@ -1,0 +1,10 @@
+[Unit]
+Description=Pull homelab repo and compose up every stack
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/homelab
+ExecStart=%h/homelab/bin/homelab-sync
+TimeoutStartSec=10min
