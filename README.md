@@ -41,6 +41,12 @@ make status                # timer + container health
 From a laptop: `ssh jasperpi.local ~/homelab/bin/homelab-sync` deploys right now instead of
 waiting for the timer.
 
+## Secrets
+
+`ledboard/.env` on the Pi is not tracked, so new vars in `.env.example` don't arrive on their own.
+`LEDBOARD_AUTH_ISSUER` and `LEDBOARD_AUTH_AUTHORIZED_PARTIES` must be set there or `POST /text`
+stays open to the LAN.
+
 ## Rollback
 
 Set `LEDBOARD_TAG=sha-abc1234` in `ledboard/.env` and run `make sync`. Set it back to `main`
